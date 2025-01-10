@@ -2,7 +2,7 @@ import { Signal } from "signal-polyfill";
 import { toDisposable, type Disposifiable } from "@bodil/disposable";
 import type { AbortableJob } from "@bodil/core/async";
 import { abortable } from "@bodil/core/async";
-import { Err, Ok, type Result } from "@bodil/opt";
+import { Err, Ok, type Result } from "@bodil/core";
 
 interface ReadableSignal<A> {
     readonly value: A;
