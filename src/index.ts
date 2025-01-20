@@ -1,8 +1,6 @@
 import { Signal } from "signal-polyfill";
 import { toDisposable, type Disposifiable } from "@bodil/disposable";
-import type { AbortableJob } from "@bodil/core/async";
-import { abortable } from "@bodil/core/async";
-import { Err, Ok, type Result } from "@bodil/core";
+import { Err, Ok, type Result, Async } from "@bodil/core";
 
 interface ReadableSignal<A> {
     readonly value: A;
@@ -107,9 +105,9 @@ export function asyncComputed<A>(
     options?: Signal.Options<A>
 ): Promise<ComputedSignal<A>> {
     const result = Promise.withResolvers<ComputedSignal<A>>();
-    const stream = computed(() => abortable(fn));
+    const stream = computed(() => Async.abortable(fn));
     const sig: StateSignal<Result<A, Error>> = signal(Err(new Error()));
-    let job: AbortableJob<A> | undefined = undefined;
+    let job: Async.AbortableJob<A> | undefined = undefined;
     let resolved = false;
     const resolve = () => {
         if (!resolved) {

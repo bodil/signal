@@ -1,6 +1,6 @@
 {
     "name": "@bodil/signal",
-    "version": "0.0.2",
+    "version": "0.1.0",
     "description": "Preact Signals like signal implementation built on the TC39 Signals Proposal",
     "repository": {
         "type": "git",
@@ -30,21 +30,21 @@
         "prepublish": "tsc"
     },
     "dependencies": {
-        "@bodil/core": "^0.0.2",
-        "@bodil/disposable": "^0.0.2",
-        "signal-polyfill": "^0.2.1"
+        "@bodil/core": "^0.1.0",
+        "@bodil/disposable": "^0.1.0",
+        "signal-polyfill": "^0.2.2"
     },
     "devDependencies": {
         "@bodil/opt-vitest": "^1.0.0",
         "@eslint/eslintrc": "^3.2.0",
         "@eslint/js": "^9.18.0",
-        "@typescript-eslint/eslint-plugin": "^8.19.1",
-        "@typescript-eslint/parser": "^8.19.1",
-        "eslint": "^9.17.0",
-        "eslint-config-prettier": "^9.1.0",
-        "eslint-plugin-jsdoc": "^50.6.1",
+        "@typescript-eslint/eslint-plugin": "^8.21.0",
+        "@typescript-eslint/parser": "^8.21.0",
+        "eslint": "^9.18.0",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-jsdoc": "^50.6.2",
         "globals": "^15.14.0",
         "typescript": "^5.7.3",
-        "vitest": "^2.1.8"
+        "vitest": "^3.0.2"
     }
 }
