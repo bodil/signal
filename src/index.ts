@@ -48,7 +48,9 @@ export class ComputedSignal<A> extends Signal.Computed<A> implements ReadableSig
     }
 }
 
-export type { ReadableSignal as Signal };
+type AnySignal<A> = StateSignal<A> | ComputedSignal<A>;
+
+export type { AnySignal as Signal };
 
 export const subtle = Signal.subtle;
 
