@@ -54,6 +54,18 @@ export type { AnySignal as Signal };
 
 export const subtle = Signal.subtle;
 
+export function isStateSignal(v: unknown): v is StateSignal<unknown> {
+    return v instanceof StateSignal;
+}
+
+export function isComputedSignal(v: unknown): v is ComputedSignal<unknown> {
+    return v instanceof ComputedSignal;
+}
+
+export function isSignal(v: unknown): v is AnySignal<unknown> {
+    return isStateSignal(v) || isComputedSignal(v);
+}
+
 export function signal<A>(value: A, options?: Signal.Options<A>): StateSignal<A> {
     return new StateSignal(value, options);
 }

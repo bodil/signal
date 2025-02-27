@@ -1,6 +1,14 @@
 import { sleep } from "@bodil/core/async";
 import { expect, test } from "vitest";
-import { asyncComputed, effect, signal } from ".";
+import {
+    asyncComputed,
+    computed,
+    effect,
+    isComputedSignal,
+    isSignal,
+    isStateSignal,
+    signal,
+} from ".";
 
 test("Signal", async () => {
     const sig = signal(0);
@@ -74,4 +82,18 @@ test("asyncComputed", async () => {
     expect(c.value).toEqual(3);
     await sleep(1);
     expect(c.value).toEqual(4);
+});
+
+test("isSignal", () => {
+    const s1 = signal(1);
+    expect(isSignal(s1)).toBeTruthy();
+    expect(isStateSignal(s1)).toBeTruthy();
+    expect(isComputedSignal(s1)).toBeFalsy();
+
+    const s2 = computed(() => 2);
+    expect(isSignal(s2)).toBeTruthy();
+    expect(isStateSignal(s2)).toBeFalsy();
+    expect(isComputedSignal(s2)).toBeTruthy();
+
+    expect(isSignal("wibble")).toBeFalsy();
 });
