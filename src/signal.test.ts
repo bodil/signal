@@ -1,5 +1,5 @@
 import { sleep } from "@bodil/core/async";
-import { expect, test } from "vitest";
+import { expect, expectTypeOf, test } from "vitest";
 import { Signal } from ".";
 
 test("Signal", async () => {
@@ -77,7 +77,7 @@ test("asyncComputed", async () => {
 });
 
 test("isSignal", () => {
-    const s1 = Signal(1);
+    const s1: Signal.State<number> = Signal(1);
     expect(Signal.is(s1)).toBeTruthy();
     expect(Signal.State.is(s1)).toBeTruthy();
     expect(Signal.Computed.is(s1)).toBeFalsy();
@@ -88,4 +88,16 @@ test("isSignal", () => {
     expect(Signal.Computed.is(s2)).toBeTruthy();
 
     expect(Signal.is("wibble")).toBeFalsy();
+});
+
+test("Signal types", () => {
+    const s1: Signal.State<number> = Signal(1);
+    const s2: Signal.Computed<number> = Signal.computed(() => s1.get());
+
+    function foo(_signal: Signal<unknown>) {
+        // ensure Signal<A> is an accessible type
+        // and that it accepts both concrete signal types.
+    }
+    foo(s1);
+    foo(s2);
 });

@@ -4,11 +4,11 @@ import { Err, Ok, type Result, Async } from "@bodil/core";
 
 interface ISignal<A> {
     readonly value: A;
-    map<B>(fn: (value: A) => B): Computed<B>;
+    map<B>(fn: (value: A) => B): ComputedSignal<B>;
     on(callback: (value: A) => void): Disposable;
 }
 
-class State<A> extends Signal.State<A> implements ISignal<A> {
+class StateSignal<A> extends Signal.State<A> implements ISignal<A> {
     get value(): A {
         return this.get();
     }
@@ -21,38 +21,38 @@ class State<A> extends Signal.State<A> implements ISignal<A> {
         this.set(Signal.subtle.untrack(() => fn(this.get())));
     }
 
-    readOnly(): Computed<A> {
-        return AnySignal.computed(() => this.get());
+    readOnly(): ComputedSignal<A> {
+        return SignalGlobal.computed(() => this.get());
     }
 
-    map<B>(fn: (value: A) => B): Computed<B> {
-        return AnySignal.computed(() => fn(this.get()));
+    map<B>(fn: (value: A) => B): ComputedSignal<B> {
+        return SignalGlobal.computed(() => fn(this.get()));
     }
 
     on(callback: (value: A) => void): Disposable {
-        return AnySignal.subscribe(this, callback);
+        return SignalGlobal.subscribe(this, callback);
     }
 
-    static is(v: unknown): v is State<unknown> {
-        return v instanceof State;
+    static is(v: unknown): v is StateSignal<unknown> {
+        return v instanceof StateSignal;
     }
 }
 
-class Computed<A> extends Signal.Computed<A> implements ISignal<A> {
+class ComputedSignal<A> extends Signal.Computed<A> implements ISignal<A> {
     get value(): A {
         return this.get();
     }
 
-    map<B>(fn: (value: A) => B): Computed<B> {
-        return AnySignal.computed(() => fn(this.get()));
+    map<B>(fn: (value: A) => B): ComputedSignal<B> {
+        return SignalGlobal.computed(() => fn(this.get()));
     }
 
     on(callback: (value: A) => void): Disposable {
-        return AnySignal.subscribe(this, callback);
+        return SignalGlobal.subscribe(this, callback);
     }
 
-    static is(v: unknown): v is Computed<unknown> {
-        return v instanceof Computed;
+    static is(v: unknown): v is ComputedSignal<unknown> {
+        return v instanceof ComputedSignal;
     }
 }
 
@@ -72,28 +72,31 @@ function effectProcess(): void {
     effectWatcher.watch();
 }
 
-type AnySignal<A> = State<A> | Computed<A>;
+type SignalGlobal<A> = StateSignal<A> | ComputedSignal<A>;
 
-const AnySignal = Object.assign(
-    function <A>(value: A, options?: Signal.Options<A>): State<A> {
-        return new State(value, options);
+const SignalGlobal = Object.assign(
+    function <A>(value: A, options?: Signal.Options<A>): SignalGlobal.State<A> {
+        return new StateSignal(value, options);
     },
     {
-        is(v: unknown): v is AnySignal<unknown> {
-            return State.is(v) || Computed.is(v);
+        is(v: unknown): v is SignalGlobal<unknown> {
+            return StateSignal.is(v) || ComputedSignal.is(v);
         },
 
-        computed<A>(fn: (this: Computed<A>) => A, options?: Signal.Options<A>): Computed<A> {
-            return new Computed(fn, options);
+        computed<A>(
+            fn: (this: ComputedSignal<A>) => A,
+            options?: Signal.Options<A>
+        ): SignalGlobal.Computed<A> {
+            return new ComputedSignal(fn, options);
         },
 
         subscribe<A>(signal: ISignal<A>, callback: (value: A) => void): Disposable {
-            return AnySignal.effect(() => callback(signal.value));
+            return SignalGlobal.effect(() => callback(signal.value));
         },
 
         effect(fn: () => Disposifiable | void): Disposable {
             let cleanup: Disposable | undefined;
-            const computed = new Computed(() => {
+            const computed = new ComputedSignal(() => {
                 if (cleanup !== undefined) {
                     cleanup[Symbol.dispose]();
                 }
@@ -113,19 +116,19 @@ const AnySignal = Object.assign(
         asyncComputed<A>(
             fn: (abort: AbortSignal) => Promise<A>,
             options?: Signal.Options<A>
-        ): Promise<Computed<A>> {
-            const result = Promise.withResolvers<Computed<A>>();
-            const stream = AnySignal.computed(() => Async.abortable(fn));
-            const sig: State<Result<A, Error>> = AnySignal(Err(new Error()));
+        ): Promise<SignalGlobal.Computed<A>> {
+            const result = Promise.withResolvers<ComputedSignal<A>>();
+            const stream = SignalGlobal.computed(() => Async.abortable(fn));
+            const sig: StateSignal<Result<A, Error>> = SignalGlobal(Err(new Error()));
             let job: Async.AbortableJob<A> | undefined = undefined;
             let resolved = false;
             const resolve = () => {
                 if (!resolved) {
                     resolved = true;
-                    result.resolve(AnySignal.computed(() => sig.get().unwrapExact(), options));
+                    result.resolve(SignalGlobal.computed(() => sig.get().unwrapExact(), options));
                 }
             };
-            AnySignal.effect(() => {
+            SignalGlobal.effect(() => {
                 if (job !== undefined) {
                     job.abort();
                 }
@@ -147,10 +150,15 @@ const AnySignal = Object.assign(
             return result.promise;
         },
 
-        State,
-        Computed,
+        State: StateSignal,
+        Computed: ComputedSignal,
         subtle: Signal.subtle,
     }
 );
 
-export { AnySignal as Signal };
+declare namespace SignalGlobal {
+    export type State<A> = StateSignal<A>;
+    export type Computed<A> = ComputedSignal<A>;
+}
+
+export { SignalGlobal as Signal };
