@@ -1,7 +1,7 @@
 {
     "name": "@bodil/signal",
     "version": "0.2.2",
-    "description": "Preact Signals like signal implementation built on the TC39 Signals Proposal",
+    "description": "Signal implementation built on the TC39 Signals Proposal",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/bodil/signal.git"

@@ -1,19 +1,11 @@
 import { sleep } from "@bodil/core/async";
 import { expect, test } from "vitest";
-import {
-    asyncComputed,
-    computed,
-    effect,
-    isComputedSignal,
-    isSignal,
-    isStateSignal,
-    signal,
-} from ".";
+import { Signal } from ".";
 
 test("Signal", async () => {
-    const sig = signal(0);
+    const sig = Signal(0);
     const result: Array<number> = [];
-    effect(() => void result.push(sig.value));
+    Signal.effect(() => void result.push(sig.value));
     expect(result).toEqual([0]);
     sig.value = 1;
     sig.value = 2;
@@ -33,8 +25,8 @@ test("Signal", async () => {
 
 test("signal equality", async () => {
     const result: Array<number> = [];
-    const sig = signal(0);
-    effect(() => void result.push(sig.value));
+    const sig = Signal(0);
+    Signal.effect(() => void result.push(sig.value));
     expect(result).toEqual([0]);
     sig.value = 1;
     await sleep(1);
@@ -60,11 +52,11 @@ test("signal equality", async () => {
 });
 
 test("asyncComputed", async () => {
-    const s = signal(1);
-    const c = await asyncComputed(() => Promise.resolve(s.value + 1));
+    const s = Signal(1);
+    const c = await Signal.asyncComputed(() => Promise.resolve(s.value + 1));
     expect(c.value).toEqual(2);
     try {
-        await asyncComputed(() => {
+        await Signal.asyncComputed(() => {
             throw new Error("welp!");
         });
         throw new Error("computed error failed to throw");
@@ -85,15 +77,15 @@ test("asyncComputed", async () => {
 });
 
 test("isSignal", () => {
-    const s1 = signal(1);
-    expect(isSignal(s1)).toBeTruthy();
-    expect(isStateSignal(s1)).toBeTruthy();
-    expect(isComputedSignal(s1)).toBeFalsy();
+    const s1 = Signal(1);
+    expect(Signal.is(s1)).toBeTruthy();
+    expect(Signal.State.is(s1)).toBeTruthy();
+    expect(Signal.Computed.is(s1)).toBeFalsy();
 
-    const s2 = computed(() => 2);
-    expect(isSignal(s2)).toBeTruthy();
-    expect(isStateSignal(s2)).toBeFalsy();
-    expect(isComputedSignal(s2)).toBeTruthy();
+    const s2 = Signal.computed(() => 2);
+    expect(Signal.is(s2)).toBeTruthy();
+    expect(Signal.State.is(s2)).toBeFalsy();
+    expect(Signal.Computed.is(s2)).toBeTruthy();
 
-    expect(isSignal("wibble")).toBeFalsy();
+    expect(Signal.is("wibble")).toBeFalsy();
 });
