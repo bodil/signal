@@ -1,6 +1,6 @@
 {
     "name": "@bodil/signal",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "description": "Signal implementation built on the TC39 Signals Proposal",
     "repository": {
         "type": "git",
